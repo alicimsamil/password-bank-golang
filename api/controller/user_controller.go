@@ -5,10 +5,10 @@ import "net/http"
 type UserController struct {
 }
 
-func (controller *UserController) login(rw http.ResponseWriter, req *http.Request) {
+func (controller *UserController) Login(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-func (controller *UserController) register(rw http.ResponseWriter, req *http.Request) {
+func (controller *UserController) Register(rw http.ResponseWriter, req *http.Request) {
 
 }

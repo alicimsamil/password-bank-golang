@@ -9,7 +9,7 @@ import (
 type PasswordController struct {
 }
 
-func (controller *PasswordController) greetings(rw http.ResponseWriter, req *http.Request) {
+func (controller *PasswordController) Greetings(rw http.ResponseWriter, req *http.Request) {
 	_, err := fmt.Fprintln(rw, "Hi! Welcome to my password API. I hope you enjoy it!")
 	if err != nil {
 		log.Println("Error writing response: ", err)
@@ -17,22 +17,22 @@ func (controller *PasswordController) greetings(rw http.ResponseWriter, req *htt
 	}
 }
 
-func (controller *PasswordController) getPasswordById(rw http.ResponseWriter, req *http.Request) {
+func (controller *PasswordController) GetPasswordById(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-func (controller *PasswordController) getAllPasswords(rw http.ResponseWriter, req *http.Request) {
+func (controller *PasswordController) GetAllPasswords(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-func (controller *PasswordController) createPassword(rw http.ResponseWriter, req *http.Request) {
+func (controller *PasswordController) CreatePassword(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-func (controller *PasswordController) updatePassword(rw http.ResponseWriter, req *http.Request) {
+func (controller *PasswordController) UpdatePassword(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-func (controller *PasswordController) deletePassword(rw http.ResponseWriter, req *http.Request) {
+func (controller *PasswordController) DeletePassword(rw http.ResponseWriter, req *http.Request) {
 
 }
