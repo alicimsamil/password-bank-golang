@@ -18,6 +18,7 @@ var SecretKey = []byte("your-secret-key")
 func (controller *UserController) Login(rw http.ResponseWriter, req *http.Request) {
 	user, err := decodeUser(req)
 	if err != nil {
+		//I need to check all functions err handling mechanisms
 		log.Printf("Error: %s", err)
 		rw.WriteHeader(http.StatusBadRequest)
 		return
