@@ -5,6 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"log"
 	"net/http"
+	"password-bank-golang/api/controller"
 	"strings"
 )
 
@@ -13,7 +14,7 @@ func AuthMiddleWare(handler http.HandlerFunc) http.HandlerFunc {
 		authHeader := req.Header.Get("Authorization")
 		if authHeader == "" {
 			rw.WriteHeader(http.StatusUnauthorized)
-			log.Printf("Unauthorized action! Uri: %s", req.RequestURI)
+			log.Printf("Error: Unauthorized action! Uri: %s", req.RequestURI)
 			return
 		}
 
@@ -21,7 +22,7 @@ func AuthMiddleWare(handler http.HandlerFunc) http.HandlerFunc {
 
 		if len(token) != 2 {
 			rw.WriteHeader(http.StatusUnauthorized)
-			log.Printf("Unauthorized action! Uri: %s", req.RequestURI)
+			log.Printf("Error: Unauthorized action! Uri: %s", req.RequestURI)
 			return
 		}
 
@@ -38,7 +39,7 @@ func AuthMiddleWare(handler http.HandlerFunc) http.HandlerFunc {
 
 func verifyToken(token string) error {
 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		return token, nil
+		return controller.SecretKey, nil
 	})
 
 	if err != nil {

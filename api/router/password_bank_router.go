@@ -30,7 +30,7 @@ func (c *PasswordBankRouter) InitRouter() *mux.Router {
 
 	//User operations
 	router.Path("/login").HandlerFunc(middleWare(c.userController.Login)).Methods(http.MethodPost)
-	router.Path("/login").HandlerFunc(middleWare(c.userController.Register)).Methods(http.MethodPost)
+	router.Path("/register").HandlerFunc(middleWare(c.userController.Register)).Methods(http.MethodPost)
 
 	return router
 }
