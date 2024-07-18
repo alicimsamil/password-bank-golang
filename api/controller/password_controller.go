@@ -21,8 +21,7 @@ func (controller *PasswordController) Greetings(rw http.ResponseWriter, req *htt
 }
 
 func (controller *PasswordController) GetPasswordById(rw http.ResponseWriter, req *http.Request) {
-
-	email, err := getUserEmail(req)
+	_, err := getUserEmail(req)
 	//I need to check all functions err handling mechanisms
 	if err != nil {
 		log.Println(err)
@@ -32,8 +31,9 @@ func (controller *PasswordController) GetPasswordById(rw http.ResponseWriter, re
 }
 
 func (controller *PasswordController) GetAllPasswords(rw http.ResponseWriter, req *http.Request) {
-	email, err := getUserEmail(req)
+	_, err := getUserEmail(req)
 	if err != nil {
+		//I need to check all functions err handling mechanisms
 		log.Println(err)
 		rw.WriteHeader(http.StatusBadRequest)
 		return
@@ -41,7 +41,7 @@ func (controller *PasswordController) GetAllPasswords(rw http.ResponseWriter, re
 }
 
 func (controller *PasswordController) CreatePassword(rw http.ResponseWriter, req *http.Request) {
-	email, err := getUserEmail(req)
+	_, err := getUserEmail(req)
 	if err != nil {
 		log.Println(err)
 		rw.WriteHeader(http.StatusBadRequest)
@@ -50,7 +50,7 @@ func (controller *PasswordController) CreatePassword(rw http.ResponseWriter, req
 }
 
 func (controller *PasswordController) UpdatePassword(rw http.ResponseWriter, req *http.Request) {
-	email, err := getUserEmail(req)
+	_, err := getUserEmail(req)
 	if err != nil {
 		log.Println(err)
 		rw.WriteHeader(http.StatusBadRequest)
@@ -59,7 +59,7 @@ func (controller *PasswordController) UpdatePassword(rw http.ResponseWriter, req
 }
 
 func (controller *PasswordController) DeletePassword(rw http.ResponseWriter, req *http.Request) {
-	email, err := getUserEmail(req)
+	_, err := getUserEmail(req)
 	if err != nil {
 		log.Println(err)
 		rw.WriteHeader(http.StatusBadRequest)

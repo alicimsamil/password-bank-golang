@@ -1,1 +1,1 @@
-package password_bank_golang
+package main
