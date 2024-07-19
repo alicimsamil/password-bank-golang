@@ -4,18 +4,24 @@ import (
 	"database/sql"
 	"log"
 	"password-bank-golang/service/model"
+	"time"
 )
 
 type IPasswordRepository interface {
+	GetPasswordById(passId string, email string) (model.Password, error)
+	GetAllPasswords(email string) ([]model.Password, error)
+	CreatePassword(passModel model.Password, email string) error
+	UpdatePassword(passModel model.Password, email string) error
+	DeletePassword(id string, email string) error
 }
 
 type PasswordRepository struct {
 	conn *sql.DB
 }
 
-func (repo *PasswordRepository) GetPasswordById(passId string) (model.Password, error) {
-	query := "SELECT 1 FROM password WHERE id = $1"
-	row := repo.conn.QueryRow(query, passId)
+func (repo *PasswordRepository) GetPasswordById(passId string, email string) (model.Password, error) {
+	query := "SELECT 1 FROM password WHERE id = $1 AND user_email = $2"
+	row := repo.conn.QueryRow(query, passId, email)
 
 	pass, err := extractPasswordFromRow(row)
 	if err != nil {
@@ -25,9 +31,9 @@ func (repo *PasswordRepository) GetPasswordById(passId string) (model.Password, 
 	return pass, nil
 }
 
-func (repo *PasswordRepository) GetAllPasswords() ([]model.Password, error) {
-	query := "SELECT * FROM password"
-	rows, err := repo.conn.Query(query)
+func (repo *PasswordRepository) GetAllPasswords(email string) ([]model.Password, error) {
+	query := "SELECT * FROM password WHERE user_email = $1"
+	rows, err := repo.conn.Query(query, email)
 
 	if err != nil {
 		return nil, err
@@ -52,8 +58,8 @@ func (repo *PasswordRepository) CreatePassword(passModel model.Password, email s
 	return nil
 }
 
-func (repo *PasswordRepository) UpdatePassword(passModel model.Password) error {
-	query := "UPDATE password SET password = $1, type = $2, account = $3, service_name = $4, notes = $5, date = $6 WHERE id = $7"
+func (repo *PasswordRepository) UpdatePassword(passModel model.Password, email string) error {
+	query := "UPDATE password SET password = $1, type = $2, account = $3, service_name = $4, notes = $5, date = $6 WHERE id = $7 AND user_email = $8"
 	_, err := repo.conn.Exec(
 		query,
 		passModel.Password,
@@ -63,6 +69,7 @@ func (repo *PasswordRepository) UpdatePassword(passModel model.Password) error {
 		passModel.Notes,
 		passModel.Date,
 		passModel.Id,
+		email,
 	)
 	if err != nil {
 		log.Println(err)
@@ -72,9 +79,9 @@ func (repo *PasswordRepository) UpdatePassword(passModel model.Password) error {
 	return nil
 }
 
-func (repo *PasswordRepository) DeletePassword(id string) error {
-	query := "DELETE FROM password WHERE id = $1"
-	_, err := repo.conn.Exec(query, id)
+func (repo *PasswordRepository) DeletePassword(id string, email string) error {
+	query := "DELETE FROM password WHERE id = $1 AND user_email = $2"
+	_, err := repo.conn.Exec(query, id, email)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -90,7 +97,7 @@ func extractPasswordsFromRows(rows *sql.Rows) ([]model.Password, error) {
 	var account string
 	var serviceName string
 	var notes string
-	var date string
+	var date time.Time
 
 	for rows.Next() {
 		if err := rows.Scan(&id, &password, &pType, &account, &serviceName, &notes, &date); err != nil {
@@ -120,7 +127,7 @@ func extractPasswordFromRow(row *sql.Row) (model.Password, error) {
 	var account string
 	var serviceName string
 	var notes string
-	var date string
+	var date time.Time
 
 	if err := row.Scan(&id, &password, &pType, &account, &serviceName, &notes, &date); err != nil {
 		log.Println(err)

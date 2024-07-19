@@ -38,7 +38,7 @@ func (repo *UserRepository) CreateUser(userEmail string, userPassword string) er
 
 func (repo *UserRepository) LoginUser(userEmail string, userPassword string) error {
 	var userExists bool
-	query := "SELECT EXISTS(SELECT 1 FROM user WHERE email = $1 AND password = $2)"
+	query := "SELECT EXISTS(SELECT 1 FROM public.user WHERE email = $1 AND password = $2)"
 
 	err := repo.conn.QueryRow(query, userEmail, userPassword).Scan(&userExists)
 	if err != nil || !userExists {
@@ -51,7 +51,7 @@ func (repo *UserRepository) LoginUser(userEmail string, userPassword string) err
 func isUserExists(dbConn *sql.DB, email string) (bool, error) {
 	var userExists bool
 
-	query := "SELECT EXISTS(SELECT 1 FROM user WHERE email = $1)"
+	query := "SELECT EXISTS(SELECT 1 FROM public.user WHERE email = $1)"
 	err := dbConn.QueryRow(query, email).Scan(&userExists)
 
 	if err != nil {
