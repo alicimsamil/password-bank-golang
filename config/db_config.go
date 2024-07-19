@@ -2,7 +2,7 @@ package config
 
 type DBConfig struct {
 	Host       string
-	Port       string
+	Port       int16
 	UserName   string
 	Password   string
 	DbName     string
@@ -13,7 +13,7 @@ type DBConfig struct {
 func GetDbConfig() DBConfig {
 	return DBConfig{
 		Host:       "localhost",
-		Port:       "5432",
+		Port:       5432,
 		UserName:   "postgres",
 		Password:   "PASSWORD",
 		DbName:     "password_bank",
