@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type Password struct {
 	Id          int32
 	Password    string
@@ -7,5 +9,5 @@ type Password struct {
 	Account     string
 	ServiceName string
 	Notes       string
-	Date        string
+	Date        time.Time
 }
