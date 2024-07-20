@@ -19,26 +19,20 @@ type PasswordController struct {
 }
 
 func (controller *PasswordController) Greetings(rw http.ResponseWriter, req *http.Request) {
-	_, err := fmt.Fprintln(rw, "Hi! Welcome to my password API. I hope you enjoy it!")
-	if err != nil {
-		log.Println("Error writing response: ", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-	}
+	fmt.Fprintln(rw, "Hi! Welcome to my password API. I hope you enjoy it!")
 }
 
 func (controller *PasswordController) GetPasswordById(rw http.ResponseWriter, req *http.Request) {
 	email, err := getUserEmail(req)
-	//I need to check all functions err handling mechanisms
 	if err != nil {
-		log.Println(err)
-		rw.WriteHeader(http.StatusBadRequest)
+		http.Error(rw, "Invalid user email", http.StatusBadRequest)
 		return
 	}
 
 	var args = mux.Vars(req)
 	password, err := controller.service.GetPasswordById(args["id"], email)
 	if err != nil {
-		rw.WriteHeader(http.StatusNotFound)
+		http.Error(rw, "Password not found", http.StatusNotFound)
 		return
 	}
 
@@ -62,20 +56,16 @@ func (controller *PasswordController) GetPasswordById(rw http.ResponseWriter, re
 func (controller *PasswordController) GetAllPasswords(rw http.ResponseWriter, req *http.Request) {
 	email, err := getUserEmail(req)
 	if err != nil {
-		//I need to check all functions err handling mechanisms
-		log.Println(err)
-		rw.WriteHeader(http.StatusBadRequest)
+		http.Error(rw, "Invalid user email", http.StatusBadRequest)
 		return
 	}
 
-	var allPasswords []model.GetPasswordResponse
 	passwords, err := controller.service.GetAllPasswords(email)
-
 	if err != nil {
-		rw.WriteHeader(http.StatusNotFound)
+		http.Error(rw, "Passwords not found", http.StatusNotFound)
 		return
 	}
-
+	var allPasswords []model.GetPasswordResponse
 	for _, element := range passwords {
 		allPasswords = append(allPasswords, model.GetPasswordResponse{
 			Id:          element.Id,
@@ -87,39 +77,34 @@ func (controller *PasswordController) GetAllPasswords(rw http.ResponseWriter, re
 			Date:        element.Date})
 	}
 
-	err = json.NewEncoder(rw).Encode(allPasswords)
-	if err != nil {
-		log.Println(err)
-		rw.WriteHeader(http.StatusInternalServerError)
+	if err := json.NewEncoder(rw).Encode(allPasswords); err != nil {
+		http.Error(rw, "Failed to encode passwords", http.StatusInternalServerError)
 		return
 	}
+
+	rw.WriteHeader(http.StatusOK)
 }
 
 func (controller *PasswordController) SavePassword(rw http.ResponseWriter, req *http.Request) {
 	email, err := getUserEmail(req)
 	if err != nil {
-		log.Println(err)
-		rw.WriteHeader(http.StatusBadRequest)
+		http.Error(rw, "Invalid user email", http.StatusBadRequest)
 		return
 	}
 
 	var passReq model.PasswordRequest
-
-	err = json.NewDecoder(req.Body).Decode(&passReq)
-	if err != nil {
-		log.Println(err)
-		rw.WriteHeader(http.StatusBadRequest)
+	if err := json.NewDecoder(req.Body).Decode(&passReq); err != nil {
+		http.Error(rw, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	err = controller.service.InsertPassword(passReq, email)
-	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
+	if err := controller.service.InsertPassword(passReq, email); err != nil {
+		http.Error(rw, "Failed to save password", http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Fprintln(rw, "Your password saved.")
 	rw.WriteHeader(http.StatusOK)
+	fmt.Fprintln(rw, "Your password saved.")
 }
 
 func (controller *PasswordController) UpdatePassword(rw http.ResponseWriter, req *http.Request) {
@@ -131,36 +116,37 @@ func (controller *PasswordController) UpdatePassword(rw http.ResponseWriter, req
 	}
 
 	var passReq model.PasswordRequest
-
-	err = json.NewDecoder(req.Body).Decode(&passReq)
-
-	err = controller.service.UpdatePassword(passReq, email)
-	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
+	if err := json.NewDecoder(req.Body).Decode(&passReq); err != nil {
+		http.Error(rw, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	fmt.Fprintln(rw, "Your password updated.")
+	if err := controller.service.UpdatePassword(passReq, email); err != nil {
+		http.Error(rw, "Failed to update password", http.StatusInternalServerError)
+		return
+	}
+
 	rw.WriteHeader(http.StatusOK)
+	fmt.Fprintln(rw, "Your password updated.")
 }
 
 func (controller *PasswordController) DeletePassword(rw http.ResponseWriter, req *http.Request) {
 	email, err := getUserEmail(req)
 	if err != nil {
-		log.Println(err)
-		rw.WriteHeader(http.StatusBadRequest)
+		http.Error(rw, "Invalid user email", http.StatusBadRequest)
 		return
 	}
 
-	var args = mux.Vars(req)
-	err = controller.service.DeletePassword(args["id"], email)
-	if err != nil {
-		rw.WriteHeader(http.StatusNotFound)
+	args := mux.Vars(req)
+	if err := controller.service.DeletePassword(args["id"], email); err != nil {
+		http.Error(rw, "Password not found", http.StatusNotFound)
 		return
 	}
+
+	rw.WriteHeader(http.StatusOK)
+	fmt.Fprintln(rw, "Password deleted.")
 }
 
-// I am not sure about this function
 func getUserEmail(r *http.Request) (string, error) {
 	auth := r.Header.Get("Authorization")
 
@@ -169,20 +155,17 @@ func getUserEmail(r *http.Request) (string, error) {
 	token, err := jwt.Parse(parsed, func(token *jwt.Token) (interface{}, error) {
 		return config.SecretKey, nil
 	})
-
 	if err != nil {
 		return "", err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
-
 	if !ok {
 		return "", errors.New("token didn't parsed")
 	}
 
-	email := claims["email"].(string)
-
-	if email == "" {
+	email, ok := claims["email"].(string)
+	if !ok || email == "" {
 		return "", errors.New("email not found in token")
 	}
 

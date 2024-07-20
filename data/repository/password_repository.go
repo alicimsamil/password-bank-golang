@@ -51,7 +51,6 @@ func (repo *PasswordRepository) InsertPassword(passModel model.Password, email s
 	query := "INSERT INTO password(password, type, account, service_name, notes, date, user_email) VALUES($1, $2, $3, $4, $5, $6, $7)"
 	_, err := repo.conn.Exec(query, passModel.Password, passModel.Type, passModel.Account, passModel.ServiceName, passModel.Notes, passModel.Date, email)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
@@ -72,7 +71,6 @@ func (repo *PasswordRepository) UpdatePassword(passModel model.Password, email s
 		email,
 	)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
@@ -83,7 +81,6 @@ func (repo *PasswordRepository) DeletePassword(id string, email string) error {
 	query := "DELETE FROM password WHERE id = $1 AND user_email = $2"
 	_, err := repo.conn.Exec(query, id, email)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 	return nil
