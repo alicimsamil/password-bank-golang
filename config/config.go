@@ -1,5 +1,8 @@
 package config
 
+// SecretKey JWT secret
+var SecretKey = []byte("your-secret-key")
+
 type DBConfig struct {
 	Host       string
 	Port       int16
