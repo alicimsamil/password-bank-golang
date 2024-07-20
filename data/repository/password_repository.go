@@ -10,7 +10,7 @@ import (
 type IPasswordRepository interface {
 	GetPasswordById(passId string, email string) (model.Password, error)
 	GetAllPasswords(email string) ([]model.Password, error)
-	CreatePassword(passModel model.Password, email string) error
+	InsertPassword(passModel model.Password, email string) error
 	UpdatePassword(passModel model.Password, email string) error
 	DeletePassword(id string, email string) error
 }
@@ -47,7 +47,7 @@ func (repo *PasswordRepository) GetAllPasswords(email string) ([]model.Password,
 	return passwords, nil
 }
 
-func (repo *PasswordRepository) CreatePassword(passModel model.Password, email string) error {
+func (repo *PasswordRepository) InsertPassword(passModel model.Password, email string) error {
 	query := "INSERT INTO password(password, type, account, service_name, notes, date, user_email) VALUES($1, $2, $3, $4, $5, $6, $7)"
 	_, err := repo.conn.Exec(query, passModel.Password, passModel.Type, passModel.Account, passModel.ServiceName, passModel.Notes, passModel.Date, email)
 	if err != nil {

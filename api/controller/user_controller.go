@@ -7,19 +7,27 @@ import (
 	"log"
 	"net/http"
 	"password-bank-golang/api/controller/model"
+	"password-bank-golang/config"
+	"password-bank-golang/service"
 	"time"
 )
 
 type UserController struct {
+	service service.IUserService
 }
-
-var SecretKey = []byte("your-secret-key")
 
 func (controller *UserController) Login(rw http.ResponseWriter, req *http.Request) {
 	user, err := decodeUser(req)
 	if err != nil {
 		//I need to check all functions err handling mechanisms
 		log.Printf("Error: %s", err)
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = controller.service.LoginUser(user.Email, user.Password)
+	if err != nil {
+		log.Println(err)
 		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -38,6 +46,13 @@ func (controller *UserController) Register(rw http.ResponseWriter, req *http.Req
 	user, err := decodeUser(req)
 	if err != nil {
 		log.Printf("Error: %s", err)
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = controller.service.CreateUser(user.Email, user.Password)
+	if err != nil {
+		log.Println(err)
 		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -65,8 +80,8 @@ func writeTokenResponse(w http.ResponseWriter, token string) {
 	}
 }
 
-func decodeUser(req *http.Request) (model.User, error) {
-	var user model.User
+func decodeUser(req *http.Request) (model.UserRequest, error) {
+	var user model.UserRequest
 	err := json.NewDecoder(req.Body).Decode(&user)
 	if err != nil || user.Email == "" || user.Password == "" {
 		return user, errors.New("invalid credentials")
@@ -80,11 +95,15 @@ func createJWTToken(email string) (string, error) {
 		"exp":   time.Now().Add(time.Minute * 45).Unix(),
 	})
 
-	tokenStr, err := token.SignedString(SecretKey)
+	tokenStr, err := token.SignedString(config.SecretKey)
 
 	if err != nil {
 		return "", err
 	}
 
 	return tokenStr, nil
+}
+
+func NewUserController(service service.IUserService) *UserController {
+	return &UserController{service: service}
 }

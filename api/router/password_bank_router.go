@@ -24,7 +24,7 @@ func (c *PasswordBankRouter) InitRouter() *mux.Router {
 	router.Path("/").HandlerFunc(middleware.LoggingMiddleWare(c.passController.Greetings)).Methods(http.MethodGet)
 	router.Path("/password/all").HandlerFunc(middleWare(c.passController.GetAllPasswords)).Methods(http.MethodGet)
 	router.Path("/password/{id}").HandlerFunc(middleWare(c.passController.GetPasswordById)).Methods(http.MethodGet)
-	router.Path("/password").HandlerFunc(middleWare(c.passController.CreatePassword)).Methods(http.MethodPost)
+	router.Path("/password").HandlerFunc(middleWare(c.passController.SavePassword)).Methods(http.MethodPost)
 	router.Path("/password/edit").HandlerFunc(middleWare(c.passController.UpdatePassword)).Methods(http.MethodPut)
 	router.Path("/password/{id}").HandlerFunc(middleWare(c.passController.DeletePassword)).Methods(http.MethodDelete)
 
