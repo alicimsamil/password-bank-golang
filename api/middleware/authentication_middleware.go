@@ -5,7 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"log"
 	"net/http"
-	"password-bank-golang/api/controller"
+	"password-bank-golang/config"
 	"strings"
 )
 
@@ -39,7 +39,7 @@ func AuthMiddleWare(handler http.HandlerFunc) http.HandlerFunc {
 
 func verifyToken(token string) error {
 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		return controller.SecretKey, nil
+		return config.SecretKey, nil
 	})
 
 	if err != nil {
