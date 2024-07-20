@@ -11,6 +11,7 @@ import (
 	"password-bank-golang/api/controller/model"
 	"password-bank-golang/config"
 	"password-bank-golang/service"
+	passModel "password-bank-golang/service/model"
 	"strings"
 )
 
@@ -36,15 +37,7 @@ func (controller *PasswordController) GetPasswordById(rw http.ResponseWriter, re
 		return
 	}
 
-	err = json.NewEncoder(rw).Encode(
-		model.GetPasswordResponse{
-			Id:          password.Id,
-			Password:    password.Password,
-			Type:        password.Type,
-			Account:     password.Account,
-			ServiceName: password.ServiceName,
-			Notes:       password.Notes,
-			Date:        password.Date})
+	err = json.NewEncoder(rw).Encode(passModelToPassResponse(&password))
 
 	if err != nil {
 		log.Println(err)
@@ -67,14 +60,7 @@ func (controller *PasswordController) GetAllPasswords(rw http.ResponseWriter, re
 	}
 	var allPasswords []model.GetPasswordResponse
 	for _, element := range passwords {
-		allPasswords = append(allPasswords, model.GetPasswordResponse{
-			Id:          element.Id,
-			Password:    element.Password,
-			Type:        element.Type,
-			Account:     element.Account,
-			ServiceName: element.ServiceName,
-			Notes:       element.Notes,
-			Date:        element.Date})
+		allPasswords = append(allPasswords, passModelToPassResponse(&element))
 	}
 
 	if err := json.NewEncoder(rw).Encode(allPasswords); err != nil {
@@ -170,6 +156,17 @@ func getUserEmail(r *http.Request) (string, error) {
 	}
 
 	return email, nil
+}
+
+func passModelToPassResponse(password *passModel.Password) model.GetPasswordResponse {
+	return model.GetPasswordResponse{
+		Id:          password.Id,
+		Password:    password.Password,
+		Type:        password.Type,
+		Account:     password.Account,
+		ServiceName: password.ServiceName,
+		Notes:       password.Notes,
+		Date:        password.Date}
 }
 
 func NewPasswordController(service service.IPasswordService) *PasswordController {
