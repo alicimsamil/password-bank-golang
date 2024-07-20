@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"password-bank-golang/service/model"
 	"time"
@@ -20,7 +21,7 @@ type PasswordRepository struct {
 }
 
 func (repo *PasswordRepository) GetPasswordById(passId string, email string) (model.Password, error) {
-	query := "SELECT 1 FROM password WHERE id = $1 AND user_email = $2"
+	query := "SELECT * FROM password WHERE id = $1 AND user_email = $2"
 	row := repo.conn.QueryRow(query, passId, email)
 
 	pass, err := extractPasswordFromRow(row)
@@ -79,9 +80,12 @@ func (repo *PasswordRepository) UpdatePassword(passModel model.Password, email s
 
 func (repo *PasswordRepository) DeletePassword(id string, email string) error {
 	query := "DELETE FROM password WHERE id = $1 AND user_email = $2"
-	_, err := repo.conn.Exec(query, id, email)
+	r, err := repo.conn.Exec(query, id, email)
 	if err != nil {
 		return err
+	}
+	if deleted, _ := r.RowsAffected(); deleted == 0 {
+		return errors.New("no record found")
 	}
 	return nil
 }
@@ -95,9 +99,10 @@ func extractPasswordsFromRows(rows *sql.Rows) ([]model.Password, error) {
 	var serviceName string
 	var notes string
 	var date time.Time
+	var email string
 
 	for rows.Next() {
-		if err := rows.Scan(&id, &password, &pType, &account, &serviceName, &notes, &date); err != nil {
+		if err := rows.Scan(&id, &password, &pType, &account, &serviceName, &notes, &date, &email); err != nil {
 			log.Println(err)
 			return []model.Password{}, err
 		} else {
@@ -110,7 +115,6 @@ func extractPasswordsFromRows(rows *sql.Rows) ([]model.Password, error) {
 				Notes:       notes,
 				Date:        date,
 			})
-			return passwords, nil
 		}
 	}
 	return passwords, nil
@@ -125,8 +129,9 @@ func extractPasswordFromRow(row *sql.Row) (model.Password, error) {
 	var serviceName string
 	var notes string
 	var date time.Time
+	var email string
 
-	if err := row.Scan(&id, &password, &pType, &account, &serviceName, &notes, &date); err != nil {
+	if err := row.Scan(&id, &password, &pType, &account, &serviceName, &notes, &date, &email); err != nil {
 		log.Println(err)
 		return model.Password{}, err
 	} else {

@@ -19,7 +19,6 @@ type UserController struct {
 func (controller *UserController) Login(rw http.ResponseWriter, req *http.Request) {
 	user, err := decodeUser(req)
 	if err != nil {
-		//I need to check all functions err handling mechanisms
 		log.Printf("Error: %s", err)
 		rw.WriteHeader(http.StatusBadRequest)
 		return
@@ -27,15 +26,13 @@ func (controller *UserController) Login(rw http.ResponseWriter, req *http.Reques
 
 	err = controller.service.LoginUser(user.Email, user.Password)
 	if err != nil {
-		log.Println(err)
-		rw.WriteHeader(http.StatusBadRequest)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	token, err := createJWTToken(user.Email)
 	if err != nil {
-		log.Println("Error: Could not create token")
-		rw.WriteHeader(http.StatusInternalServerError)
+		http.Error(rw, "Error: Could not create token", http.StatusInternalServerError)
 		return
 	}
 
@@ -52,15 +49,13 @@ func (controller *UserController) Register(rw http.ResponseWriter, req *http.Req
 
 	err = controller.service.CreateUser(user.Email, user.Password)
 	if err != nil {
-		log.Println(err)
-		rw.WriteHeader(http.StatusBadRequest)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	token, err := createJWTToken(user.Email)
 	if err != nil {
-		log.Println("Error: Could not create token")
-		rw.WriteHeader(http.StatusInternalServerError)
+		http.Error(rw, "Error: Could not create token", http.StatusInternalServerError)
 		return
 	}
 
